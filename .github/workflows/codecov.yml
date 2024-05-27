@@ -31,9 +31,6 @@ jobs:
     - name: Install dependencies
       run: poetry install --extras "torch"
 
-    - name: Install pytest and coverage
-      run: pip install pytest-cov
-
     - name: Run tests
       run: poetry run pytest --cov=synthcausalgen -s tests
 

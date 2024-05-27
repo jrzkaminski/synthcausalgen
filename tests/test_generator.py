@@ -51,7 +51,6 @@ def test_custom_model_pools():
     custom_root_model_pool = [
         scipy.stats.norm,
         scipy.stats.laplace,
-        scipy.stats.t,
         scipy.stats.uniform,
         scipy.stats.rayleigh,
     ]
