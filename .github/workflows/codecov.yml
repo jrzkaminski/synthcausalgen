@@ -10,9 +10,11 @@ jobs:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v4
       with:
-        python-version: '3.9'
+        python-version: '3.12'
     - name: Update pip
       run: python -m pip install --upgrade pip
+    - name: Install poetry
+      run: pip install poetry
     - name: Install requirements
       run: poetry install
     - name: Install pytest-cov
