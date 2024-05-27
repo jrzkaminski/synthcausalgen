@@ -1,37 +1,24 @@
-name: CI
+name: Build
 
-on:
-  push:
-    branches: [master]
-  pull_request:
-    branches: [master]
+on: [push, pull_request]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        python-version: [3.12]
-
+    name: Test python API
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
       with:
-        python-version: 3.12
-
-    - name: Install dependencies and run tests
-      run: |
-        python -m pip install --upgrade pip
-        pip install poetry
-        poetry install --extras "torch"
-        poetry install
-        poetry run pip install pytest-cov
-        poetry run pytest --cov=synthcausalgen -s tests
-
+        python-version: '3.9'
+    - name: Update pip
+      run: python -m pip install --upgrade pip
+    - name: Install requirements
+      run: poetry install
+    - name: Install pytest-cov
+      run: pip install pytest-cov
+    - name: Run tests and collect coverage
+      run: pytest --cov=synthcausalgen -s tests
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4.0.1
       with:
