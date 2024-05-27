@@ -1,5 +1,9 @@
 # Synthetic Causal Data Generator
 
+[![codecov](https://codecov.io/github/jrzkaminski/synthcausalgen/graph/badge.svg?token=3LI5NF370R)](https://codecov.io/github/jrzkaminski/synthcausalgen)
+
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 My tiny library for creating synthetic data using causal mechanisms on a graph.
 
 ## QuickStart
