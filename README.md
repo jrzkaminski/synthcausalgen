@@ -13,6 +13,8 @@ Use the package manager [poetry](https://python-poetry.org/) to install the synt
 Clone the repository and run the following command in the root directory of the repository.
 
 ```bash
+git clone https://github.com/jrzkaminski/synthcausalgen.git
+cd synthcausalgen
 poetry install
 ```
 
