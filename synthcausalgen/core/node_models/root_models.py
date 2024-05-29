@@ -9,10 +9,10 @@ class RootNodeModel(abc.ABC):
 
 
 class RootDistributionModel(RootNodeModel):
-    def __init__(self, model_pool=None):
+    def __init__(self, model_pool=None, params=None):
         self.model_pool = model_pool
         self.distribution = random.choice(self.model_pool)
-        self.params = self.distribution.stats(moments="mvsk")
+        self.params = params if params is not None else {}
 
     def sample(self, size):
-        return self.distribution.rvs(size=size)
+        return self.distribution.rvs(size=size, **self.params)

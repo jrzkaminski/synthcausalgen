@@ -76,6 +76,38 @@ def test_custom_model_pools():
         descriptions["leaf_1_0"]["model"], (LinearLeafModel, PolynomialLeafModel)
     )
 
+def test_max_parents():
+    layer_structure = {
+        0: 3,
+        1: 2,
+        2: 3
+    }
+    generator = SyntheticDataGenerator(layer_structure, max_parents=2)
+    graph = generator.get_graph()
+    descriptions = generator.get_node_descriptions()
+    
+    for node, attr in graph.nodes(data=True):
+        if attr['layer'] > 0:
+            parents = list(graph.predecessors(node))
+            assert len(parents) <= 2
+
+def test_custom_root_params():
+    layer_structure = {
+        0: 3,
+        1: 2,
+        2: 3
+    }
+    root_params = {
+        "root_0": {"loc": 0, "scale": 1},
+        "root_1": {"loc": 5, "scale": 2},
+        "root_2": {"loc": 10, "scale": 3},
+    }
+    generator = SyntheticDataGenerator(layer_structure, root_params=root_params)
+    descriptions = generator.get_node_descriptions()
+    
+    assert descriptions['root_0']['params'] == {"loc": 0, "scale": 1}
+    assert descriptions['root_1']['params'] == {"loc": 5, "scale": 2}
+    assert descriptions['root_2']['params'] == {"loc": 10, "scale": 3}
 
 if __name__ == "__main__":
     pytest.main()
