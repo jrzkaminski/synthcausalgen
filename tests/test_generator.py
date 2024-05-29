@@ -72,6 +72,7 @@ def test_custom_model_pools():
     assert descriptions["root_0"]["type"] == "root"
     assert "leaf_1_0" in descriptions
     assert "model" in descriptions["leaf_1_0"]
+    assert 'noise_model' in descriptions['leaf_1_0']
     assert isinstance(
         descriptions["leaf_1_0"]["model"], (LinearLeafModel, PolynomialLeafModel)
     )

@@ -86,7 +86,8 @@ class SyntheticDataGenerator:
             self.node_descriptions[node_name] = {
                 'type': 'leaf',
                 'parents': parents,
-                'model': model
+                'model': model,
+                'noise_model': model.noise_model
             }
 
     def _generate_data_for_node(self, node, data, size):
