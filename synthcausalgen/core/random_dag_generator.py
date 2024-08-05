@@ -26,13 +26,14 @@ class RandomDAGGenerator:
         return G
 
     def create_nodes(self):
-        for level in range(self.depth):
+        total_nodes = 0
+        while total_nodes < self.num_nodes:
             level_nodes = []
             for _ in range(self.breadth):
-                if self.current_node < self.num_nodes:
-                    node_name = f"feature_{self.current_node}"
+                if total_nodes < self.num_nodes:
+                    node_name = f"feature_{total_nodes}"
                     level_nodes.append(node_name)
-                    self.current_node += 1
+                    total_nodes += 1
             self.levels.append(level_nodes)
 
     def add_nodes_to_graph(self, G):
