@@ -6,7 +6,11 @@ import networkx as nx
 import scipy
 
 from synthcausalgen.core import RandomDAGGenerator
-from synthcausalgen.core.node_models.leaf_models import PolynomialLeafModel, NeuralNetworkLeafModel, LinearLeafModel
+from synthcausalgen.core.node_models.leaf_models import (
+    PolynomialLeafModel,
+    NeuralNetworkLeafModel,
+    LinearLeafModel,
+)
 from synthcausalgen.synthdatagen import SyntheticDataGenerator
 
 
@@ -21,11 +25,11 @@ def test_initialization():
     assert len(descriptions) == total_nodes
     for node in graph.nodes:
         if list(graph.predecessors(node)):
-            assert descriptions[node]['type'] == 'leaf'
-            assert 'model' in descriptions[node]
-            assert 'noise_model' in descriptions[node]
+            assert descriptions[node]["type"] == "leaf"
+            assert "model" in descriptions[node]
+            assert "noise_model" in descriptions[node]
         else:
-            assert descriptions[node]['type'] == 'root'
+            assert descriptions[node]["type"] == "root"
 
 
 def test_parents_from_any_layer():
@@ -48,7 +52,7 @@ def test_get_dataframe():
 
     assert isinstance(df, pd.DataFrame)
     assert df.shape == (100, 8)
-    assert all(col.startswith('feature_') for col in df.columns)
+    assert all(col.startswith("feature_") for col in df.columns)
 
 
 def test_custom_model_pools():
@@ -66,7 +70,7 @@ def test_custom_model_pools():
         dag,
         root_model_pool=custom_root_model_pool,
         leaf_model_pool=custom_leaf_model_pool,
-        noise_model_pool=custom_noise_model_pool
+        noise_model_pool=custom_noise_model_pool,
     )
     graph = generator.get_graph()
     descriptions = generator.get_node_descriptions()
@@ -76,12 +80,17 @@ def test_custom_model_pools():
     assert len(descriptions) == total_nodes
     for node in graph.nodes:
         if list(graph.predecessors(node)):
-            assert descriptions[node]['type'] == 'leaf'
-            assert 'model' in descriptions[node]
-            assert 'noise_model' in descriptions[node]
-            assert isinstance(descriptions[node]['model'], (LinearLeafModel, PolynomialLeafModel))
-            assert all(not isinstance(descriptions[node]['model'], NeuralNetworkLeafModel) for node in descriptions if
-                       'leaf' in node)
+            assert descriptions[node]["type"] == "leaf"
+            assert "model" in descriptions[node]
+            assert "noise_model" in descriptions[node]
+            assert isinstance(
+                descriptions[node]["model"], (LinearLeafModel, PolynomialLeafModel)
+            )
+            assert all(
+                not isinstance(descriptions[node]["model"], NeuralNetworkLeafModel)
+                for node in descriptions
+                if "leaf" in node
+            )
 
 
 def test_custom_root_params():
@@ -94,9 +103,9 @@ def test_custom_root_params():
     generator = SyntheticDataGenerator(dag, root_params=root_params)
     descriptions = generator.get_node_descriptions()
 
-    assert descriptions['feature_0']['params'] == {"loc": 0, "scale": 1}
-    assert descriptions['feature_1']['params'] == {"loc": 5, "scale": 2}
-    assert descriptions['feature_2']['params'] == {"loc": 10, "scale": 3}
+    assert descriptions["feature_0"]["params"] == {"loc": 0, "scale": 1}
+    assert descriptions["feature_1"]["params"] == {"loc": 5, "scale": 2}
+    assert descriptions["feature_2"]["params"] == {"loc": 10, "scale": 3}
 
-    if __name__ == '__main__':
+    if __name__ == "__main__":
         pytest.main()

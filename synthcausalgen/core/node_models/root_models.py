@@ -15,4 +15,8 @@ class RootDistributionModel(RootNodeModel):
         self.params = params if params is not None else {}
 
     def sample(self, size):
-        return self.distribution.rvs(size=size, **self.params)
+        try:
+            return self.distribution.rvs(size=size, **self.params)
+        except TypeError:
+            # Handle distributions that do not accept loc/scale parameters
+            return self.distribution.rvs(size=size)

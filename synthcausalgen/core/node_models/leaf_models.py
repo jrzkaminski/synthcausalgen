@@ -56,7 +56,9 @@ class ExponentialLeafModel(LeafNodeModel):
         self.noise_model = random.choice(self.noise_model_pool)
 
     def compute(self, inputs):
-        return np.dot(np.exp(inputs), self.coefs)
+        # Clamp the inputs to avoid overflow in exp
+        clamped_inputs = np.clip(inputs, -100, 100)
+        return np.dot(np.exp(clamped_inputs), self.coefs)
 
     def add_noise(self, output):
         noise = self.noise_model.rvs(size=output.shape)
