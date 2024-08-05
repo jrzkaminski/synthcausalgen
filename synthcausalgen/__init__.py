@@ -1,0 +1,1 @@
+from synthcausalgen.synthdatagen import SyntheticDataGenerator

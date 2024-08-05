@@ -31,7 +31,8 @@ class LinearLeafModel(LeafNodeModel):
         return np.dot(inputs, self.coefs)
 
     def add_noise(self, output):
-        return output + self.noise_model.rvs(size=output.shape)
+        noise = self.noise_model.rvs(size=output.shape)
+        return output + noise
 
 
 class PolynomialLeafModel(LeafNodeModel):
@@ -44,7 +45,8 @@ class PolynomialLeafModel(LeafNodeModel):
         return np.dot(np.power(inputs, 2), self.coefs)
 
     def add_noise(self, output):
-        return output + self.noise_model.rvs(size=output.shape)
+        noise = self.noise_model.rvs(size=output.shape)
+        return output + noise
 
 
 class ExponentialLeafModel(LeafNodeModel):
@@ -57,7 +59,8 @@ class ExponentialLeafModel(LeafNodeModel):
         return np.dot(np.exp(inputs), self.coefs)
 
     def add_noise(self, output):
-        return output + self.noise_model.rvs(size=output.shape)
+        noise = self.noise_model.rvs(size=output.shape)
+        return output + noise
 
 
 class LogarithmicLeafModel(LeafNodeModel):
