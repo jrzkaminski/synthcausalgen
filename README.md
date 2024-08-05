@@ -4,7 +4,7 @@
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-My tiny library for creating synthetic data using causal mechanisms on a graph.
+My tiny library for creating synthetic tabular data using causal mechanisms on a graph.
 
 ## QuickStart
 
@@ -29,11 +29,26 @@ poetry install --extras "torch"
 Here is a simple example of how to use the synthetic data generator.
 
 ```python
-from synthcausalgen.synthdatagen import SyntheticDataGenerator
-from synthcausalgen.core.node_models.leaf_models import LinearLeafModel, PolynomialLeafModel, ExponentialLeafModel, \
-    LogarithmicLeafModel, NeuralNetworkLeafModel
+import pandas as pd
 import scipy.stats as stats
+from synthcausalgen.core.node_models.leaf_models import (
+    ExponentialLeafModel,
+    PolynomialLeafModel,
+    LogarithmicLeafModel,
+)
+from synthcausalgen.core.random_dag_generator import RandomDAGGenerator
+from synthcausalgen.synthdatagen import SyntheticDataGenerator
 
+# Define the parameters for the RandomDAGGenerator
+num_nodes = 8
+max_parents = 2
+depth = 3
+breadth = 3
+edge_prob = 0.5
+
+# Generate a random DAG
+dag_generator = RandomDAGGenerator(num_nodes, max_parents, depth, breadth, edge_prob)
+dag = dag_generator.generate()
 
 # Define custom model pools
 custom_root_model_pool = [
@@ -45,12 +60,17 @@ custom_root_model_pool = [
 ]
 
 custom_leaf_model_pool = [
-    LinearLeafModel,
     PolynomialLeafModel,
     ExponentialLeafModel,
-    LogarithmicLeafModel,
-    NeuralNetworkLeafModel
+    LogarithmicLeafModel
 ]
+
+# If torch is available, include the neural network model
+try:
+    from synthetic_data_generator.generator import NeuralNetworkLeafModel
+    custom_leaf_model_pool.append(NeuralNetworkLeafModel)
+except ImportError:
+    pass
 
 custom_noise_model_pool = [
     stats.norm,
@@ -58,36 +78,40 @@ custom_noise_model_pool = [
     stats.expon
 ]
 
-# Define the layer structure of the graph
-layer_structure = {
-    0: 3,  # 3 root nodes
-    1: 2,  # 2 leaf nodes in the first layer
-    2: 3   # 3 leaf nodes in the second layer
+# Define custom parameters for the root distributions
+root_params = {
+    "feature_0": {"loc": 0, "scale": 1},
+    "feature_1": {"loc": 5, "scale": 2},
+    "feature_2": {"loc": 10, "scale": 3},
 }
 
-# Initialize the synthetic data generator
+# Initialize the synthetic data generator with custom parameters
 generator = SyntheticDataGenerator(
-    layer_structure=layer_structure,
+    dag=dag,
     root_model_pool=custom_root_model_pool,
     leaf_model_pool=custom_leaf_model_pool,
-    noise_model_pool=custom_noise_model_pool
+    noise_model_pool=custom_noise_model_pool,
+    root_params=root_params
 )
 
 # Generate a dataframe with synthetic data
 df = generator.get_dataframe(size=100)
 
 # Print the first few rows of the dataframe
-df.head()
+print(df.head())
 
-# Tiny quick visualization of the graph
-nxgraph = generator.get_graph()
+# Get the networkx graph
+graph = generator.get_graph()
 
-import networkx as nx
+# Print the graph nodes
+print(graph.nodes)
 
-nx.draw(nxgraph)
+# Get the node descriptions
+node_descriptions = generator.get_node_descriptions()
 
-# Get the node descriptions with type, model and parents of each node
-generator.get_node_descriptions()
+# Print the node descriptions
+for node, desc in node_descriptions.items():
+    print(f"Node: {node}, Description: {desc}")
 ```
 
 ## Contributing
