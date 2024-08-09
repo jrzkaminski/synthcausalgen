@@ -12,93 +12,80 @@ except ImportError:
 
 
 class LeafNodeModel(abc.ABC):
+    def __init__(self, parents, noise_model_pool, add_noise=True):
+        self.add_noise = add_noise
+
     @abc.abstractmethod
     def compute(self, inputs):
         pass
 
-    @abc.abstractmethod
-    def add_noise(self, output):
-        pass
+    def add_noise_to_output(self, output):
+        if self.add_noise:
+            noise = self.noise_model.rvs(size=output.shape)
+            return output + noise
+        return output
 
 
 class LinearLeafModel(LeafNodeModel):
-    def __init__(self, parents, noise_model_pool):
+    def __init__(self, parents, noise_model_pool, add_noise=True):
+        super().__init__(parents, noise_model_pool, add_noise)
         self.coefs = np.random.randn(len(parents))
-        self.noise_model_pool = noise_model_pool
-        self.noise_model = random.choice(self.noise_model_pool)
+        self.noise_model = random.choice(noise_model_pool)
 
     def compute(self, inputs):
-        return np.dot(inputs, self.coefs)
-
-    def add_noise(self, output):
-        noise = self.noise_model.rvs(size=output.shape)
-        return output + noise
+        output = np.dot(inputs, self.coefs)
+        return self.add_noise_to_output(output)
 
 
 class PolynomialLeafModel(LeafNodeModel):
-    def __init__(self, parents, noise_model_pool):
+    def __init__(self, parents, noise_model_pool, add_noise=True):
+        super().__init__(parents, noise_model_pool, add_noise)
         self.coefs = np.random.randn(len(parents))
-        self.noise_model_pool = noise_model_pool
-        self.noise_model = random.choice(self.noise_model_pool)
+        self.noise_model = random.choice(noise_model_pool)
 
     def compute(self, inputs):
-        return np.dot(np.power(inputs, 2), self.coefs)
-
-    def add_noise(self, output):
-        noise = self.noise_model.rvs(size=output.shape)
-        return output + noise
+        output = np.dot(np.power(inputs, 2), self.coefs)
+        return self.add_noise_to_output(output)
 
 
 class ExponentialLeafModel(LeafNodeModel):
-    def __init__(self, parents, noise_model_pool):
+    def __init__(self, parents, noise_model_pool, add_noise=True):
+        super().__init__(parents, noise_model_pool, add_noise)
         self.coefs = np.random.randn(len(parents))
-        self.noise_model_pool = noise_model_pool
-        self.noise_model = random.choice(self.noise_model_pool)
+        self.noise_model = random.choice(noise_model_pool)
 
     def compute(self, inputs):
-        # Clamp the inputs to avoid overflow in exp
         clamped_inputs = np.clip(inputs, -100, 100)
-        return np.dot(np.exp(clamped_inputs), self.coefs)
-
-    def add_noise(self, output):
-        noise = self.noise_model.rvs(size=output.shape)
-        return output + noise
+        output = np.dot(np.exp(clamped_inputs), self.coefs)
+        return self.add_noise_to_output(output)
 
 
 class LogarithmicLeafModel(LeafNodeModel):
-    def __init__(self, parents, noise_model_pool):
+    def __init__(self, parents, noise_model_pool, add_noise=True):
+        super().__init__(parents, noise_model_pool, add_noise)
         self.coefs = np.random.randn(len(parents))
-        self.noise_model_pool = noise_model_pool
-        self.noise_model = random.choice(self.noise_model_pool)
+        self.noise_model = random.choice(noise_model_pool)
 
     def compute(self, inputs):
-        # Ensure inputs are positive
         positive_inputs = np.where(inputs > 0, inputs, 1e-9)
-        return np.dot(np.log(positive_inputs), self.coefs)
-
-    def add_noise(self, output):
-        noise = self.noise_model.rvs(size=output.shape)
-        return output + noise
+        output = np.dot(np.log(positive_inputs), self.coefs)
+        return self.add_noise_to_output(output)
 
 
 if TORCH_AVAILABLE:
 
     class NeuralNetworkLeafModel(LeafNodeModel):
-        def __init__(self, parents, noise_model_pool):
+        def __init__(self, parents, noise_model_pool, add_noise=True):
+            super().__init__(parents, noise_model_pool, add_noise)
             input_dim = len(parents)
             self.model = nn.Sequential(
                 nn.Linear(input_dim, input_dim * 2),
                 nn.ReLU(),
                 nn.Linear(input_dim * 2, 1),
             )
-            self.noise_model_pool = noise_model_pool
-            self.noise_model = random.choice(self.noise_model_pool)
+            self.noise_model = random.choice(noise_model_pool)
 
         def compute(self, inputs):
             inputs_tensor = torch.tensor(inputs, dtype=torch.float32)
-            outputs_tensor = self.model(inputs_tensor).detach().numpy().flatten()
-            return outputs_tensor
-
-        def add_noise(self, output):
-            noise = self.noise_model.rvs(size=output.shape)
-            return output + noise
+            output_tensor = self.model(inputs_tensor).detach().numpy().flatten()
+            return self.add_noise_to_output(output_tensor)

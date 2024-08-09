@@ -44,6 +44,7 @@ class SyntheticDataGenerator:
         leaf_model_pool=None,
         noise_model_pool=None,
         root_params=None,
+        add_noise=True,
     ):
         if not nx.is_directed_acyclic_graph(dag):
             raise ValueError(
@@ -73,6 +74,7 @@ class SyntheticDataGenerator:
             else _CONTINUOUS_DISTRIBUTIONS
         )
         self.root_params = root_params if root_params is not None else {}
+        self.add_noise = add_noise
         self.node_descriptions = self._initialize_node_descriptions()
 
     def _initialize_node_descriptions(self):
@@ -81,7 +83,9 @@ class SyntheticDataGenerator:
             if list(self.dag.predecessors(node)):
                 parents = list(self.dag.predecessors(node))
                 model_class = random.choice(self.leaf_model_pool)
-                model = model_class(parents, self.noise_model_pool)
+                model = model_class(
+                    parents, self.noise_model_pool, add_noise=self.add_noise
+                )
                 node_descriptions[node] = {
                     "type": "leaf",
                     "parents": parents,
@@ -107,9 +111,7 @@ class SyntheticDataGenerator:
             parents = self.node_descriptions[node]["parents"]
             model = self.node_descriptions[node]["model"]
             parent_data = np.column_stack([data[parent] for parent in parents])
-            outputs = model.compute(parent_data)
-            outputs_with_noise = model.add_noise(outputs)
-            return outputs_with_noise
+            return model.compute(parent_data)
 
     def get_node_descriptions(self):
         return self.node_descriptions
