@@ -47,16 +47,16 @@ os.makedirs(output_dir, exist_ok=True)
 num_pairs = 100
 
 for i in range(num_pairs):
-    for create_dag in [create_triangle_dag, create_square_dag]:  # Add more as needed
+    for dag_type, create_dag in [("triangle", create_triangle_dag),
+                                 ("square", create_square_dag)]:
+        # Original DAG
         dag_1 = create_dag()
-        dag_2 = remove_random_edge(dag_1.copy())
-
         df_1 = generate_datasets(dag_1)
+        df_1.to_csv(f"{output_dir}/{dag_type}_dataset_{i}_original.csv", index=False)
+        nx.write_edgelist(dag_1, f"{output_dir}/{dag_type}_dag_{i}_original.txt")
+
+        # Variant DAG with one edge removed
+        dag_2 = remove_random_edge(dag_1.copy())
         df_2 = generate_datasets(dag_2)
-
-        df_1.to_csv(f"{output_dir}/dataset_{i}_original.csv", index=False)
-        df_2.to_csv(f"{output_dir}/dataset_{i}_variant.csv", index=False)
-
-        nx.write_edgelist(dag_1, f"{output_dir}/dag_{i}_original.txt", data=False)
-        nx.write_edgelist(dag_2, f"{output_dir}/dag_{i}_variant.txt", data=False)
-
+        df_2.to_csv(f"{output_dir}/{dag_type}_dataset_{i}_variant.csv", index=False)
+        nx.write_edgelist(dag_2, f"{output_dir}/{dag_type}_dag_{i}_variant.txt")
