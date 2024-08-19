@@ -38,21 +38,18 @@ for i in range(num_datasets):
                                             stats.rayleigh], 5)
     custom_leaf_model_pool = random.sample(
         [
-            LinearLeafModel,
-            PolynomialLeafModel,
-            ExponentialLeafModel,
-            LogarithmicLeafModel
+            LinearLeafModel
         ],
-        3
+        1
     )
 
     # If torch is available, include the neural network model
-    try:
-        from synthetic_data_generator.generator import NeuralNetworkLeafModel
-
-        custom_leaf_model_pool.append(NeuralNetworkLeafModel)
-    except ImportError:
-        pass
+    # try:
+    #     from synthetic_data_generator.generator import NeuralNetworkLeafModel
+    #
+    #     custom_leaf_model_pool.append(NeuralNetworkLeafModel)
+    # except ImportError:
+    #     pass
 
     custom_noise_model_pool = random.sample([
                                             stats.norm,
@@ -71,7 +68,8 @@ for i in range(num_datasets):
         root_model_pool=custom_root_model_pool,
         leaf_model_pool=custom_leaf_model_pool,
         noise_model_pool=custom_noise_model_pool,
-        root_params=root_params
+        root_params=root_params,
+        add_noise=False
     )
 
     # Generate a dataframe with synthetic data
