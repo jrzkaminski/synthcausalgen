@@ -4,7 +4,10 @@ import random
 import scipy.stats as stats
 
 from synthcausalgen import SyntheticDataGenerator
-from synthcausalgen.core.node_models import LinearLeafModel
+from synthcausalgen.core.node_models import (LinearLeafModel,
+                                             PolynomialLeafModel,
+                                             LogarithmicLeafModel,
+                                             ExponentialLeafModel)
 
 
 def create_triangle_dag():
@@ -32,8 +35,8 @@ def generate_datasets(dag_generator,
                       num_samples=1000):
     dag = dag_generator
     generator = SyntheticDataGenerator(dag=dag,
-                                       root_model_pool=[stats.norm],
-                                       leaf_model_pool=[LinearLeafModel],
+                                       root_model_pool=[stats.norm, stats.laplace, stats.rayleigh, stats.t(df=10)],
+                                       leaf_model_pool=[LinearLeafModel, PolynomialLeafModel, ExponentialLeafModel, LogarithmicLeafModel],
                                        noise_model_pool=[stats.norm],
                                        add_noise=False)
     df = generator.get_dataframe(size=num_samples)
@@ -53,10 +56,10 @@ for i in range(num_pairs):
         dag_1 = create_dag()
         df_1 = generate_datasets(dag_1)
         df_1.to_csv(f"{output_dir}/{dag_type}_dataset_{i}_original.csv", index=False)
-        nx.write_edgelist(dag_1, f"{output_dir}/{dag_type}_dag_{i}_original.txt")
+        nx.write_edgelist(dag_1, f"{output_dir}/{dag_type}_dag_{i}_original.txt", data=False)
 
         # Variant DAG with one edge removed
         dag_2 = remove_random_edge(dag_1.copy())
         df_2 = generate_datasets(dag_2)
         df_2.to_csv(f"{output_dir}/{dag_type}_dataset_{i}_variant.csv", index=False)
-        nx.write_edgelist(dag_2, f"{output_dir}/{dag_type}_dag_{i}_variant.txt")
+        nx.write_edgelist(dag_2, f"{output_dir}/{dag_type}_dag_{i}_variant.txt", data=False)
